@@ -1,4 +1,5 @@
-# GSCNSSAT ID Logging System
+JAVA CSS Attendance
+
 
 QR-based learner ID logging system for General Santos City National Secondary School of Arts and Trades (GSCNSSAT).
 
