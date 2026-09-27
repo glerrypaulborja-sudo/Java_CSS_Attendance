@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>GSCNSSAT ID Logging System</title>
+
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .header {
+      background: #0b5ed7;
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 650px;
+      margin: auto;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    /* Mirror the webcam preview */
+    #reader video {
+      transform: scaleX(-1);
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #e9ecef;
+      font-weight: bold;
+    }
+
+    .success {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .success-icon {
+      font-size: 55px;
+      margin-bottom: 10px;
+    }
+
+    .learner-name {
+      font-size: 25px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .details {
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    .qr-data {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f1f3f5;
+      border-radius: 8px;
+      word-break: break-all;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 13px 22px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: #0b5ed7;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #094db1;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #777;
+      margin-top: 20px;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+```
+<div class="header">
+  <h1>GSCNSSAT ID Logging System</h1>
+  <p>Scan your school ID QR code</p>
+</div>
+
+<!-- SCANNER -->
+<div id="scannerSection" class="card">
+
+  <h2>READY TO SCAN</h2>
+
+  <p>
+    Position the QR code inside the scanning box.
+  </p>
+
+  <div id="reader"></div>
+
+  <div id="scannerStatus" class="status">
+    Waiting for QR code...
+  </div>
+
+</div>
+
+
+<!-- SUCCESS -->
+<div id="successSection" class="card hidden">
+
+  <div class="success-icon">✓</div>
+
+  <h2 class="success">
+    LOGGED SUCCESSFULLY
+  </h2>
+
+  <div id="successDetails" class="details"></div>
+
+  <div id="successQR" class="qr-data"></div>
+
+  <button
+    class="btn-primary"
+    onclick="restartScanner()">
+    SCAN NEXT ID
+  </button>
+
+</div>
+
+
+<!-- ERROR -->
+<div id="errorSection" class="card hidden">
+
+  <h2 class="error">
+    ERROR
+  </h2>
+
+  <div id="errorMessage"></div>
+
+  <button
+    class="btn-primary"
+    onclick="restartScanner()">
+    TRY AGAIN
+  </button>
+
+</div>
+
+
+<div class="footer">
+  GSCNSSAT • ID Logging System
+</div>
+```
+
+  </div>
+
+  <!-- Hidden iframe used to send the scan to Apps Script -->
+
+  <iframe
+    id="logFrame"
+    name="logFrame"
+    style="display:none;">
+  </iframe>
+
+  <script>
+
+    /*
+     * =========================================================
+     * GOOGLE APPS SCRIPT WEB APP
+     * =========================================================
+     */
+
+    const APPS_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbzIxOUSFs8XCDlT2O7oU-FC48UUb61G9dJRN45ZiKOMU_4gO27Pp1kXWlP2R4RF5ASIpg/exec";
+
+
+    /*
+     * =========================================================
+     * SETTINGS
+     * =========================================================
+     */
+
+    const STATION = "MAIN";
+    const LOG_TYPE = "SCAN";
+
+    let scanner = null;
+    let scanning = false;
+    let logging = false;
+
+
+    /*
+     * =========================================================
+     * START SCANNER
+     * =========================================================
+     */
+
+    async function startScanner() {
+
+      if (scanning) {
+        return;
+      }
+
+      hideAllSections();
+
+      document
+        .getElementById("scannerSection")
+        .classList.remove("hidden");
+
+      document
+        .getElementById("scannerStatus")
+        .textContent =
+        "Starting camera...";
+
+      try {
+
+        scanner =
+          new Html5Qrcode("reader");
+
+        scanning = true;
+
+        await scanner.start(
+
+          {
+            facingMode: "user"
+          },
+
+          {
+            fps: 10,
+
+            qrbox: {
+              width: 300,
+              height: 300
+            },
+
+            aspectRatio: 1.0
+
+          },
+
+          handleQRCode,
+
+          function(errorMessage) {
+            // Ignore normal scanning errors.
+          }
+
+        );
+
+        document
+          .getElementById("scannerStatus")
+          .textContent =
+          "READY TO SCAN";
+
+      }
+      catch (error) {
+
+        console.error(error);
+
+        scanning = false;
+
+        showError(
+          "Unable to access the camera.<br><br>" +
+          "Please make sure your browser has permission " +
+          "to use the webcam."
+        );
+
+      }
+
+    }
+
+
+    /*
+     * =========================================================
+     * QR CODE DETECTED
+     * =========================================================
+     */
+
+    async function handleQRCode(decodedText) {
+
+      if (!decodedText) {
+        return;
+      }
+
+      if (logging) {
+        return;
+      }
+
+      logging = true;
+
+      console.log("QR DATA:", decodedText);
+
+      /*
+       * Example QR:
+       *
+       * 408818180002,SHION VENZY TAKEO J.,June 23, 2013
+       *
+       * The first value is the LRN.
+       */
+
+      const parts =
+        decodedText
+          .split(",")
+          .map(function(item) {
+            return item.trim();
+          });
+
+      const lrn = parts[0];
+
+      /*
+       * Validate LRN
+       */
+
+      if (!/^\d{12}$/.test(lrn)) {
+
+        logging = false;
+
+        showError(
+          "Invalid QR code.<br><br>" +
+          "The QR code does not contain a valid 12-digit LRN."
+        );
+
+        return;
+      }
+
+
+      /*
+       * Stop camera before sending the log.
+       */
+
+      await stopScanner();
+
+
+      /*
+       * Send scan to Apps Script.
+       */
+
+      sendScan(
+        lrn,
+        decodedText
+      );
+
+    }
+
+
+    /*
+     * =========================================================
+     * SEND SCAN TO APPS SCRIPT
+     * =========================================================
+     */
+
+    function sendScan(
+      lrn,
+      decodedText
+    ) {
+
+      const url =
+        APPS_SCRIPT_URL +
+        "?lrn=" +
+        encodeURIComponent(lrn) +
+        "&station=" +
+        encodeURIComponent(STATION) +
+        "&logType=" +
+        encodeURIComponent(LOG_TYPE) +
+        "&t=" +
+        Date.now();
+
+
+      console.log(
+        "Sending scan:",
+        url
+      );
+
+
+      /*
+       * Load the Apps Script URL inside
+       * the hidden iframe.
+       */
+
+      document
+        .getElementById("logFrame")
+        .src = url;
+
+
+      /*
+       * Give Apps Script time to write
+       * the record into Google Sheets.
+       */
+
+      setTimeout(
+        function() {
+
+          showSuccess(
+            lrn,
+            decodedText
+          );
+
+        },
+        1200
+      );
+
+    }
+
+
+    /*
+     * =========================================================
+     * SUCCESS SCREEN
+     * =========================================================
+     */
+
+    function showSuccess(
+      lrn,
+      decodedText
+    ) {
+
+      hideAllSections();
+
+      const parts =
+        decodedText
+          .split(",")
+          .map(function(item) {
+            return item.trim();
