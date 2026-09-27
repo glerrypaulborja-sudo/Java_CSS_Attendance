@@ -2,14 +2,24 @@
 
 <html lang="en">
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>GSCNSSAT ID Logging System</title>
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
 
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+>
+
+  <title>GSCNSSAT ID Scanner</title>
+
+  <script
+    src="https://unpkg.com/html5-qrcode"
+    type="text/javascript">
+  </script>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -17,7 +27,6 @@
     body {
       margin: 0;
       padding: 20px;
-      min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
       background: #f4f6f8;
       color: #222;
@@ -25,35 +34,25 @@
 
     .container {
       width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
+      max-width: 900px;
+      margin: auto;
       text-align: center;
     }
 
-    .header {
-      background: #0b5ed7;
-      color: white;
-      padding: 20px;
-      border-radius: 15px;
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #666;
       margin-bottom: 20px;
-    }
-
-    .header h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
-
-    .header p {
-      margin: 0;
-      font-size: 15px;
-      opacity: 0.9;
     }
 
     .card {
       background: white;
       border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
       margin-bottom: 20px;
     }
 
@@ -61,21 +60,26 @@
       width: 100%;
       max-width: 650px;
       margin: auto;
-      overflow: hidden;
-      border-radius: 12px;
     }
 
-    /* Mirror the webcam preview */
+    /*
+     * Mirror the camera preview.
+     */
     #reader video {
       transform: scaleX(-1);
     }
 
     .status {
-      margin-top: 15px;
-      padding: 14px;
+      margin-top: 20px;
+      padding: 15px;
       border-radius: 10px;
-      background: #e9ecef;
+      font-size: 18px;
       font-weight: bold;
+    }
+
+    .ready {
+      background: #e8f0fe;
+      color: #174ea6;
     }
 
     .success {
@@ -88,24 +92,28 @@
       color: #842029;
     }
 
+    .hidden {
+      display: none;
+    }
+
     .success-icon {
-      font-size: 55px;
+      font-size: 60px;
       margin-bottom: 10px;
     }
 
     .learner-name {
-      font-size: 25px;
+      font-size: 28px;
       font-weight: bold;
-      margin: 10px 0;
+      margin: 15px 0;
     }
 
-    .details {
-      font-size: 17px;
+    .learner-info {
+      font-size: 18px;
       line-height: 1.8;
     }
 
     .qr-data {
-      margin-top: 15px;
+      margin-top: 20px;
       padding: 12px;
       background: #f1f3f5;
       border-radius: 8px;
@@ -115,33 +123,21 @@
     }
 
     button {
+      margin-top: 20px;
+      padding: 14px 25px;
       border: none;
       border-radius: 10px;
-      padding: 13px 22px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-
-    .btn-primary {
       background: #0b5ed7;
       color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
     }
 
-    .btn-primary:hover {
+    button:hover {
       background: #094db1;
     }
 
-    .hidden {
-      display: none;
-    }
-
-    .footer {
-      font-size: 12px;
-      color: #777;
-      margin-top: 20px;
-    }
   </style>
 
 </head>
@@ -151,77 +147,108 @@
   <div class="container">
 
 ```
-<div class="header">
-  <h1>GSCNSSAT ID Logging System</h1>
-  <p>Scan your school ID QR code</p>
-</div>
+<!-- ================================================= -->
+<!-- SCANNER SECTION -->
+<!-- ================================================= -->
 
-<!-- SCANNER -->
-<div id="scannerSection" class="card">
+<div
+  id="scannerSection"
+  class="card"
+>
 
-  <h2>READY TO SCAN</h2>
+  <h1>
+    GSCNSSAT ID SCANNER
+  </h1>
 
-  <p>
-    Position the QR code inside the scanning box.
-  </p>
+  <div class="subtitle">
+    Scan the learner's school ID
+  </div>
 
   <div id="reader"></div>
 
-  <div id="scannerStatus" class="status">
-    Waiting for QR code...
+  <div
+    id="scannerStatus"
+    class="status ready"
+  >
+    READY TO SCAN
   </div>
 
 </div>
 
 
-<!-- SUCCESS -->
-<div id="successSection" class="card hidden">
+<!-- ================================================= -->
+<!-- SUCCESS SECTION -->
+<!-- ================================================= -->
 
-  <div class="success-icon">✓</div>
+<div
+  id="successSection"
+  class="card hidden"
+>
 
-  <h2 class="success">
+  <div class="success-icon">
+    ✓
+  </div>
+
+  <div class="status success">
     LOGGED SUCCESSFULLY
-  </h2>
+  </div>
 
-  <div id="successDetails" class="details"></div>
+  <div
+    id="successDetails"
+    class="learner-info"
+  >
+  </div>
 
-  <div id="successQR" class="qr-data"></div>
+  <div
+    id="successQR"
+    class="qr-data"
+  >
+  </div>
 
   <button
-    class="btn-primary"
-    onclick="restartScanner()">
+    onclick="restartScanner()"
+  >
     SCAN NEXT ID
   </button>
 
 </div>
 
 
-<!-- ERROR -->
-<div id="errorSection" class="card hidden">
+<!-- ================================================= -->
+<!-- ERROR SECTION -->
+<!-- ================================================= -->
 
-  <h2 class="error">
+<div
+  id="errorSection"
+  class="card hidden"
+>
+
+  <div class="status error">
     ERROR
-  </h2>
+  </div>
 
-  <div id="errorMessage"></div>
+  <div
+    id="errorMessage"
+    style="margin-top: 15px;"
+  >
+  </div>
 
   <button
-    class="btn-primary"
-    onclick="restartScanner()">
+    onclick="restartScanner()"
+  >
     TRY AGAIN
   </button>
 
-</div>
-
-
-<div class="footer">
-  GSCNSSAT • ID Logging System
 </div>
 ```
 
   </div>
 
-  <!-- Hidden iframe used to send the scan to Apps Script -->
+  <!-- ================================================= -->
+
+  <!-- HIDDEN IFRAME -->
+
+  <!-- ================================================= -->
 
   <iframe
     id="logFrame"
@@ -232,9 +259,9 @@
   <script>
 
     /*
-     * =========================================================
-     * GOOGLE APPS SCRIPT WEB APP
-     * =========================================================
+     * =====================================================
+     * APPS SCRIPT URL
+     * =====================================================
      */
 
     const APPS_SCRIPT_URL =
@@ -242,23 +269,33 @@
 
 
     /*
-     * =========================================================
-     * SETTINGS
-     * =========================================================
+     * =====================================================
+     * SCANNER SETTINGS
+     * =====================================================
      */
 
     const STATION = "MAIN";
+
     const LOG_TYPE = "SCAN";
 
+
+    /*
+     * =====================================================
+     * VARIABLES
+     * =====================================================
+     */
+
     let scanner = null;
+
     let scanning = false;
+
     let logging = false;
 
 
     /*
-     * =========================================================
+     * =====================================================
      * START SCANNER
-     * =========================================================
+     * =====================================================
      */
 
     async function startScanner() {
@@ -276,7 +313,7 @@
       document
         .getElementById("scannerStatus")
         .textContent =
-        "Starting camera...";
+        "STARTING CAMERA...";
 
       try {
 
@@ -284,6 +321,7 @@
           new Html5Qrcode("reader");
 
         scanning = true;
+
 
         await scanner.start(
 
@@ -300,16 +338,20 @@
             },
 
             aspectRatio: 1.0
-
           },
 
           handleQRCode,
 
           function(errorMessage) {
-            // Ignore normal scanning errors.
+
+            /*
+             * Normal scanning errors are ignored.
+             */
+
           }
 
         );
+
 
         document
           .getElementById("scannerStatus")
@@ -317,6 +359,7 @@
           "READY TO SCAN";
 
       }
+
       catch (error) {
 
         console.error(error);
@@ -325,8 +368,7 @@
 
         showError(
           "Unable to access the camera.<br><br>" +
-          "Please make sure your browser has permission " +
-          "to use the webcam."
+          "Please allow webcam access in your browser."
         );
 
       }
@@ -335,9 +377,9 @@
 
 
     /*
-     * =========================================================
-     * QR CODE DETECTED
-     * =========================================================
+     * =====================================================
+     * HANDLE QR CODE
+     * =====================================================
      */
 
     async function handleQRCode(decodedText) {
@@ -352,27 +394,35 @@
 
       logging = true;
 
-      console.log("QR DATA:", decodedText);
+
+      console.log(
+        "QR DATA:",
+        decodedText
+      );
+
 
       /*
-       * Example QR:
+       * Example:
        *
        * 408818180002,SHION VENZY TAKEO J.,June 23, 2013
        *
-       * The first value is the LRN.
+       * First value = LRN
        */
 
       const parts =
         decodedText
           .split(",")
-          .map(function(item) {
-            return item.trim();
+          .map(function(value) {
+            return value.trim();
           });
 
-      const lrn = parts[0];
+
+      const lrn =
+        parts[0];
+
 
       /*
-       * Validate LRN
+       * Validate LRN.
        */
 
       if (!/^\d{12}$/.test(lrn)) {
@@ -380,7 +430,7 @@
         logging = false;
 
         showError(
-          "Invalid QR code.<br><br>" +
+          "INVALID QR CODE<br><br>" +
           "The QR code does not contain a valid 12-digit LRN."
         );
 
@@ -389,14 +439,14 @@
 
 
       /*
-       * Stop camera before sending the log.
+       * Stop scanning while the log is being recorded.
        */
 
       await stopScanner();
 
 
       /*
-       * Send scan to Apps Script.
+       * Send to Apps Script.
        */
 
       sendScan(
@@ -408,9 +458,9 @@
 
 
     /*
-     * =========================================================
-     * SEND SCAN TO APPS SCRIPT
-     * =========================================================
+     * =====================================================
+     * SEND SCAN
+     * =====================================================
      */
 
     function sendScan(
@@ -420,12 +470,16 @@
 
       const url =
         APPS_SCRIPT_URL +
+
         "?lrn=" +
         encodeURIComponent(lrn) +
+
         "&station=" +
         encodeURIComponent(STATION) +
+
         "&logType=" +
         encodeURIComponent(LOG_TYPE) +
+
         "&t=" +
         Date.now();
 
@@ -436,19 +490,14 @@
       );
 
 
-      /*
-       * Load the Apps Script URL inside
-       * the hidden iframe.
-       */
-
       document
         .getElementById("logFrame")
         .src = url;
 
 
       /*
-       * Give Apps Script time to write
-       * the record into Google Sheets.
+       * Wait for Apps Script to process
+       * the request.
        */
 
       setTimeout(
@@ -467,9 +516,9 @@
 
 
     /*
-     * =========================================================
-     * SUCCESS SCREEN
-     * =========================================================
+     * =====================================================
+     * SHOW SUCCESS
+     * =====================================================
      */
 
     function showSuccess(
@@ -479,8 +528,272 @@
 
       hideAllSections();
 
+
       const parts =
         decodedText
           .split(",")
-          .map(function(item) {
-            return item.trim();
+          .map(function(value) {
+            return value.trim();
+          });
+
+
+      let name = "";
+
+      let birthday = "";
+
+
+      if (parts.length >= 2) {
+
+        name =
+          parts[1];
+
+      }
+
+
+      if (parts.length >= 3) {
+
+        birthday =
+          parts
+            .slice(2)
+            .join(", ");
+
+      }
+
+
+      document
+        .getElementById("successDetails")
+        .innerHTML =
+
+        "<div class='learner-name'>" +
+
+        escapeHtml(
+          name || "LEARNER"
+        ) +
+
+        "</div>" +
+
+        "<strong>LRN:</strong> " +
+
+        escapeHtml(
+          lrn
+        ) +
+
+        "<br>" +
+
+        (
+          birthday
+
+            ? "<strong>Birthday:</strong> " +
+              escapeHtml(birthday)
+
+            : ""
+        );
+
+
+      document
+        .getElementById("successQR")
+        .innerHTML =
+
+        "<strong>QR DATA</strong><br>" +
+
+        escapeHtml(
+          decodedText
+        );
+
+
+      document
+        .getElementById("successSection")
+        .classList
+        .remove("hidden");
+
+    }
+
+
+    /*
+     * =====================================================
+     * SHOW ERROR
+     * =====================================================
+     */
+
+    function showError(message) {
+
+      hideAllSections();
+
+
+      document
+        .getElementById("errorMessage")
+        .innerHTML =
+        message;
+
+
+      document
+        .getElementById("errorSection")
+        .classList
+        .remove("hidden");
+
+    }
+
+
+    /*
+     * =====================================================
+     * RESTART
+     * =====================================================
+     */
+
+    async function restartScanner() {
+
+      logging = false;
+
+
+      await stopScanner();
+
+
+      document
+        .getElementById("reader")
+        .innerHTML = "";
+
+
+      startScanner();
+
+    }
+
+
+    /*
+     * =====================================================
+     * STOP SCANNER
+     * =====================================================
+     */
+
+    async function stopScanner() {
+
+      if (
+        scanner &&
+        scanning
+      ) {
+
+        try {
+
+          await scanner.stop();
+
+        }
+
+        catch (error) {
+
+          console.log(
+            "Scanner stop:",
+            error
+          );
+
+        }
+
+
+        try {
+
+          await scanner.clear();
+
+        }
+
+        catch (error) {
+
+          console.log(
+            "Scanner clear:",
+            error
+          );
+
+        }
+
+      }
+
+
+      scanning = false;
+
+      scanner = null;
+
+    }
+
+
+    /*
+     * =====================================================
+     * HIDE ALL SECTIONS
+     * =====================================================
+     */
+
+    function hideAllSections() {
+
+      document
+        .getElementById("scannerSection")
+        .classList
+        .add("hidden");
+
+
+      document
+        .getElementById("successSection")
+        .classList
+        .add("hidden");
+
+
+      document
+        .getElementById("errorSection")
+        .classList
+        .add("hidden");
+
+    }
+
+
+    /*
+     * =====================================================
+     * ESCAPE HTML
+     * =====================================================
+     */
+
+    function escapeHtml(value) {
+
+      return String(value)
+
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+
+        .replace(
+          /</g,
+          "&lt;"
+        )
+
+        .replace(
+          />/g,
+          "&gt;"
+        )
+
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+
+    }
+
+
+    /*
+     * =====================================================
+     * START AUTOMATICALLY
+     * =====================================================
+     */
+
+    window.addEventListener(
+      "load",
+      function() {
+
+        startScanner();
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
